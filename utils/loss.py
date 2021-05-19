@@ -3,8 +3,12 @@
 import torch
 import torch.nn as nn
 
-from utils.general import bbox_iou
-from utils.torch_utils import is_parallel
+try:
+    from utils.general import bbox_iou
+    from utils.torch_utils import is_parallel
+except ImportError:
+    from pipeline.detection.yolov5.utils.general import bbox_iou
+    from pipeline.detection.yolov5.utils.torch_utils import is_parallel
 
 
 def smooth_BCE(eps=0.1):  # https://github.com/ultralytics/yolov3/issues/238#issuecomment-598028441
@@ -97,7 +101,7 @@ class ComputeLoss:
         BCEobj = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([h['obj_pw']], device=device))
 
         # Class label smoothing https://arxiv.org/pdf/1902.04103.pdf eqn 3
-        self.cp, self.cn = smooth_BCE(eps=h.get('label_smoothing', 0.0))  # positive, negative BCE targets
+        self.cp, self.cn = smooth_BCE(eps=0.0)
 
         # Focal loss
         g = h['fl_gamma']  # focal loss gamma
