@@ -15,11 +15,19 @@ import torch
 import torch.nn as nn
 from torch.utils.mobile_optimizer import optimize_for_mobile
 
-import models
-from models.experimental import attempt_load
-from utils.activations import Hardswish, SiLU
-from utils.general import colorstr, check_img_size, check_requirements, file_size, set_logging
-from utils.torch_utils import select_device
+try:
+    import models
+    from models.experimental import attempt_load
+    from utils.activations import Hardswish, SiLU
+    from utils.general import colorstr, check_img_size, check_requirements, file_size, set_logging
+    from utils.torch_utils import select_device
+except ImportError:
+    import processor.pipeline.detection.yolov5.models
+    from processor.pipeline.detection.yolov5.models.experimental import attempt_load
+    from processor.pipeline.detection.yolov5.utils.activations import Hardswish, SiLU
+    from processor.pipeline.detection.yolov5.utils.general import colorstr, check_img_size, check_requirements, \
+        file_size, set_logging
+    from processor.pipeline.detection.yolov5.utils.torch_utils import select_device
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

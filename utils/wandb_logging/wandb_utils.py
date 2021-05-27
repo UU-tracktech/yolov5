@@ -7,9 +7,14 @@ import yaml
 from tqdm import tqdm
 
 sys.path.append(str(Path(__file__).parent.parent.parent))  # add utils/ to path
-from utils.datasets import LoadImagesAndLabels
-from utils.datasets import img2label_paths
-from utils.general import colorstr, xywh2xyxy, check_dataset, check_file
+try:
+    from utils.datasets import LoadImagesAndLabels
+    from utils.datasets import img2label_paths
+    from utils.general import colorstr, xywh2xyxy, check_dataset, check_file
+except ImportError:
+    from processor.pipeline.detection.yolov5.utils.datasets import LoadImagesAndLabels
+    from processor.pipeline.detection.yolov5.utils.datasets import img2label_paths
+    from processor.pipeline.detection.yolov5.utils.general import colorstr, xywh2xyxy, check_dataset, check_file
 
 try:
     import wandb

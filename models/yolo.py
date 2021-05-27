@@ -9,12 +9,21 @@ from pathlib import Path
 sys.path.append(Path(__file__).parent.parent.absolute().__str__())  # to run '$ python *.py' files in subdirectories
 logger = logging.getLogger(__name__)
 
-from models.common import *
-from models.experimental import *
-from utils.autoanchor import check_anchor_order
-from utils.general import make_divisible, check_file, set_logging
-from utils.torch_utils import time_synchronized, fuse_conv_and_bn, model_info, scale_img, initialize_weights, \
-    select_device, copy_attr
+try:
+    from models.common import *
+    from models.experimental import *
+    from utils.autoanchor import check_anchor_order
+    from utils.general import make_divisible, check_file, set_logging
+    from utils.torch_utils import time_synchronized, fuse_conv_and_bn, model_info, scale_img, initialize_weights, \
+        select_device, copy_attr
+except ImportError:
+    from processor.pipeline.detection.yolov5.models.common import *
+    from processor.pipeline.detection.yolov5.models.experimental import *
+    from processor.pipeline.detection.yolov5.utils.autoanchor import check_anchor_order
+    from processor.pipeline.detection.yolov5.utils.general import make_divisible, check_file, set_logging
+    from processor.pipeline.detection.yolov5.utils.torch_utils import time_synchronized, fuse_conv_and_bn, \
+        model_info, scale_img, initialize_weights, select_device, copy_attr
+
 
 try:
     import thop  # for FLOPS computation

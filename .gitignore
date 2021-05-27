@@ -151,6 +151,10 @@ celerybeat-schedule
 venv*/
 ENV*/
 
+# VS Code
+**/.vscode
+/.project
+
 # Spyder project settings
 .spyderproject
 .spyproject

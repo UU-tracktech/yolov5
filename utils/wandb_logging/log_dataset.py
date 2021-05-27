@@ -2,7 +2,10 @@ import argparse
 
 import yaml
 
-from wandb_utils import WandbLogger
+try:
+    from wandb_utils import WandbLogger
+except ImportError:
+    from processor.pipeline.detection.yolov5.utils.wandb_logging.wandb_utils import WandbLogger
 
 WANDB_ARTIFACT_PREFIX = 'wandb-artifact://'
 

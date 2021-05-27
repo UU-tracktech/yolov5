@@ -18,7 +18,7 @@ def gsutil_getsize(url=''):
 
 def attempt_download(file, repo='ultralytics/yolov5'):
     # Attempt file download if does not exist
-    file = Path(str(file).strip().replace("'", ''))
+    file = Path(str(file).strip().replace("'", '').lower())
 
     if not file.exists():
         file.parent.mkdir(parents=True, exist_ok=True)  # make parent dir (if required)

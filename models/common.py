@@ -11,11 +11,17 @@ import torch
 import torch.nn as nn
 from PIL import Image
 from torch.cuda import amp
-
-from utils.datasets import letterbox
-from utils.general import non_max_suppression, make_divisible, scale_coords, increment_path, xyxy2xywh, save_one_box
-from utils.plots import colors, plot_one_box
-from utils.torch_utils import time_synchronized
+try:
+    from processor.pipeline.detection.yolov5.utils.datasets import letterbox
+    from processor.pipeline.detection.yolov5.utils.general import non_max_suppression, make_divisible, scale_coords, \
+        increment_path, xyxy2xywh, save_one_box
+    from processor.pipeline.detection.yolov5.utils.plots import color_list, plot_one_box
+    from processor.pipeline.detection.yolov5.utils.torch_utils import time_synchronized
+except ImportError:
+    from utils.datasets import letterbox
+    from utils.general import non_max_suppression, make_divisible, scale_coords, increment_path, xyxy2xywh, save_one_box
+    from utils.plots import color_list, plot_one_box
+    from utils.torch_utils import time_synchronized
 
 
 def autopad(k, p=None):  # kernel, padding
