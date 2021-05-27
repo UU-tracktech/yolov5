@@ -33,7 +33,7 @@ try:
     from utils.google_utils import attempt_download
     from utils.loss import ComputeLoss
     from utils.plots import plot_images, plot_labels, plot_results, plot_evolution
-    from utils.torch_utils import ModelEMA, select_device, intersect_dicts, torch_distributed_zero_first, is_parallel
+    from utils.torch_utils import ModelEMA, select_device, intersect_dicts, torch_distributed_zero_first, de_parallel
     from utils.wandb_logging.wandb_utils import WandbLogger, check_wandb_resume
 except ImportError:
     from processor.pipeline.detection.yolov5.models.experimental import attempt_load
@@ -47,7 +47,7 @@ except ImportError:
     from processor.pipeline.detection.yolov5.utils.loss import ComputeLoss
     from processor.pipeline.detection.yolov5.utils.plots import plot_images, plot_labels, plot_results, plot_evolution
     from processor.pipeline.detection.yolov5.utils.torch_utils import ModelEMA, select_device, intersect_dicts, \
-        torch_distributed_zero_first, is_parallel
+        torch_distributed_zero_first, de_parallel
     from processor.pipeline.detection.yolov5.utils.wandb_logging.wandb_utils import WandbLogger, check_wandb_resume
 
 logger = logging.getLogger(__name__)
@@ -346,7 +346,7 @@ def train(hyp, opt, device, tb_writer=None):
                     f = save_dir / f'train_batch{ni}.jpg'  # filename
                     Thread(target=plot_images, args=(imgs, targets, paths, f), daemon=True).start()
                     if tb_writer:
-                        tb_writer.add_graph(torch.jit.trace(model, imgs, strict=False), [])  # add model graph
+                        tb_writer.add_graph(torch.jit.trace(de_parallel(model), imgs, strict=False), [])  # model graph
                         # tb_writer.add_image(f, result, dataformats='HWC', global_step=epoch)
                 elif plots and ni == 10 and wandb_logger.wandb:
                     wandb_logger.log({"Mosaics": [wandb_logger.wandb.Image(str(x), caption=x.name) for x in
@@ -405,7 +405,7 @@ def train(hyp, opt, device, tb_writer=None):
                 ckpt = {'epoch': epoch,
                         'best_fitness': best_fitness,
                         'training_results': results_file.read_text(),
-                        'model': deepcopy(model.module if is_parallel(model) else model).half(),
+                        'model': deepcopy(de_parallel(model)).half(),
                         'ema': deepcopy(ema.ema).half(),
                         'updates': ema.updates,
                         'optimizer': optimizer.state_dict(),
@@ -434,7 +434,7 @@ def train(hyp, opt, device, tb_writer=None):
         # Test best.pt
         logger.info('%g epochs completed in %.3f hours.\n' % (epoch - start_epoch + 1, (time.time() - t0) / 3600))
         if opt.data.endswith('coco.yaml') and nc == 80:  # if COCO
-            for m in (last, best) if best.exists() else (last):  # speed, mAP tests
+            for m in [last, best] if best.exists() else [last]:  # speed, mAP tests
                 results, _, _ = test.test(opt.data,
                                           batch_size=batch_size * 2,
                                           imgsz=imgsz_test,
@@ -458,7 +458,7 @@ def train(hyp, opt, device, tb_writer=None):
         if wandb_logger.wandb and not opt.evolve:  # Log the stripped model
             wandb_logger.wandb.log_artifact(str(final), type='model',
                                             name='run_' + wandb_logger.wandb_run.id + '_model',
-                                            aliases=['last', 'best', 'stripped'])
+                                            aliases=['latest', 'best', 'stripped'])
         wandb_logger.finish_run()
     else:
         dist.destroy_process_group()
@@ -540,6 +540,7 @@ if __name__ == '__main__':
         device = torch.device('cuda', opt.local_rank)
         dist.init_process_group(backend='nccl', init_method='env://')  # distributed backend
         assert opt.batch_size % opt.world_size == 0, '--batch-size must be multiple of CUDA device count'
+        assert not opt.image_weights, '--image-weights argument is not compatible with DDP training'
         opt.batch_size = opt.total_batch_size // opt.world_size
 
     # Hyperparameters
