@@ -1,4 +1,4 @@
-# Resume all interrupted trainings in yolov5/ dir including DDP trainings
+# Resume all interrupted trainings in yolov5/ dir including DPP trainings
 # Usage: $ python utils/aws/resume.py
 
 import os
@@ -8,7 +8,7 @@ from pathlib import Path
 import torch
 import yaml
 
-sys.path.append('./')  # to run '$ python *.py' files in subdirectories
+sys.path.append('/')  # to run '$ python *.py' files in subdirectories
 
 port = 0  # --master_port
 path = Path('').resolve()
@@ -19,7 +19,7 @@ for last in path.rglob('*/**/last.pt'):
 
     # Load opt.yaml
     with open(last.parent.parent / 'opt.yaml') as f:
-        opt = yaml.safe_load(f)
+        opt = yaml.load(f, Loader=yaml.SafeLoader)
 
     # Get device count
     d = opt['device'].split(',')  # devices
